@@ -1,0 +1,18 @@
+/* client/src/App.css */
+
+.App {
+  background-image: linear-gradient(to bottom right, #3a6b58, #0e5d90);
+  min-height: 100vh;
+  color: white;
+}
+
+.nowPlaying {
+  padding: 10%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  margin: 10px !important;
+}
