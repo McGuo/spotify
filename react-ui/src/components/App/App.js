@@ -130,7 +130,7 @@ class App extends Component {
           {!this.state.loggedIn && (
             <div>
               <a
-                href="http://localhost:5000/login"
+                href="https://pacific-sands-61806.herokuapp.com/login"
                 className="medium ui spotify inverted button"
               >
                 <i className="spotify icon green" />
