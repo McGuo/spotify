@@ -24,7 +24,8 @@ class App extends Component {
       stillLoading: true,
       isPlaying: false,
       warning: false,
-      message: ""
+      message: "",
+      url: "https://pacific-sands-61806.herokuapp.com/login"
     };
   }
   getHashParams() {
@@ -112,6 +113,13 @@ class App extends Component {
   }
 
   async componentDidMount() {
+    const isDev = process.env.NODE_ENV !== "production";
+    if (isDev) {
+      this.setState({
+        url: "http://localhost:5000/login"
+      });
+    }
+
     this.intervalId = await setInterval(() => {
       if (this.state.loggedIn) {
         this.getNowPlaying();
@@ -130,7 +138,7 @@ class App extends Component {
           {!this.state.loggedIn && (
             <div>
               <a
-                href="https://pacific-sands-61806.herokuapp.com/login"
+                href={this.state.url}
                 className="medium ui spotify inverted button"
               >
                 <i className="spotify icon green" />
@@ -161,8 +169,8 @@ class App extends Component {
         </div>
         <div>
           {this.state.recentlyPlayed.length !== 0 && (
-            <div class="ui">
-              <h4 class="ui horizontal divider" style={{ color: "white" }}>
+            <div className="ui">
+              <h4 className="ui horizontal divider" style={{ color: "white" }}>
                 what you've been listening to
               </h4>
             </div>

@@ -13,20 +13,18 @@ const isDev = process.env.NODE_ENV !== "production";
 const PORT = process.env.PORT || 5000;
 
 var secret;
+var front_end_url;
 
 if (isDev) {
   secret = require("./secret");
+  front_end_url = "http://localhost:3000";
+} else {
+  front_end_url = "https://pacific-sands-61806.herokuapp.com";
 }
 
 const CLIENT_ID = process.env.CLIENT_ID || secret.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET || secret.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI || secret.REDIRECT_URI;
-
-// let s3 = new aws.S3({
-//   CLIENT_ID: process.env.CLIENT_ID,
-//   CLIENT_SECRET: process.env.CLIENT_SECRET,
-//   REDIRECT_URI: process.env.REDIRECT_URI
-// });
 
 // Multi-process to utilize all CPU cores.
 if (!isDev && cluster.isMaster) {
@@ -135,7 +133,7 @@ if (!isDev && cluster.isMaster) {
 
           // we can also pass the token to the browser to make requests from there
           res.redirect(
-            "https://pacific-sands-61806.herokuapp.com/#" +
+            `${front_end_url}/#` +
               querystring.stringify({
                 access_token: access_token,
                 refresh_token: refresh_token
