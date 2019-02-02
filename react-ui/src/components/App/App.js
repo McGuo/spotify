@@ -4,6 +4,7 @@ import SpotifyWebApi from "spotify-web-api-js";
 import Card from "../Card/";
 import ScrollableContainer from "../ScrollableContainer/";
 import NeonBox from "../NeonBox/";
+import Loader from "../Loader/";
 
 const spotifyApi = new SpotifyWebApi();
 
@@ -113,8 +114,7 @@ class App extends Component {
   }
 
   async componentDidMount() {
-    const isDev = process.env.NODE_ENV !== "production";
-    if (isDev) {
+    if (process.env.NODE_ENV !== "production") {
       this.setState({
         url: "http://localhost:5000/login"
       });
@@ -161,7 +161,8 @@ class App extends Component {
           {this.state.stillLoading &&
             this.state.loggedIn &&
             !this.state.warning && (
-              <div className="ui active inline big loader inverted" />
+              // <div className="ui active inline big loader inverted" />
+              <Loader />
             )}
           {this.state.warning && (
             <h1 style={{ "font-family": "Monoton" }}>{this.state.message}</h1>
