@@ -11,7 +11,9 @@ const spotifyApi = new SpotifyWebApi();
 class App extends Component {
   constructor() {
     super();
+    // Getting the parameters from the url
     const params = this.getHashParams();
+    // Getting the hashed token
     const token = params.access_token;
 
     if (token) {
@@ -24,12 +26,11 @@ class App extends Component {
       recentlyPlayed: [],
       stillLoading: true,
       isPlaying: false,
-      warning: false,
-      message: "",
-      url: "https://pacific-sands-61806.herokuapp.com/login"
+      warning: { status: false, message: "" },
+      url: ""
     };
   }
-  getHashParams() {
+  getHashParams = () => {
     var hashParams = {};
     var e,
       r = /([^&;=]+)=?([^&;]*)/g,
@@ -40,9 +41,9 @@ class App extends Component {
       e = r.exec(q);
     }
     return hashParams;
-  }
-
-  async getRecentlyPlayed() {
+  };
+  // Gets the recently played tracks of the user
+  getRecentlyPlayed = async () => {
     try {
       const response = await spotifyApi.getMyRecentlyPlayedTracks({
         limit: 10
@@ -55,10 +56,12 @@ class App extends Component {
     } catch (e) {
       console.log(e.response);
     }
-  }
+  };
 
-  async getNowPlaying() {
+  // Gets the currently playing track
+  getNowPlaying = async () => {
     try {
+      // Check the current track that is playing
       const response = await spotifyApi.getMyCurrentPlaybackState();
 
       if (response) {
@@ -77,16 +80,8 @@ class App extends Component {
           this.setState({ isPlaying: response.is_playing });
         }
 
-        if (this.state.stillLoading === true) {
-          this.setState({
-            stillLoading: false
-          });
-        }
-
-        if (this.state.warning) {
-          this.setState({
-            warning: !this.state.warning
-          });
+        if (this.state.warning.status) {
+          this.setState({ warning: { status: false } });
         }
 
         this.setState({
@@ -94,39 +89,85 @@ class App extends Component {
             songName: song.name,
             albumArt: song.album.images[0].url,
             artistNames: song.artists
-          }
+          },
+          stillLoading: false
         });
       } else {
-        if (this.state.warning) {
-          this.getRecentlyPlayed();
-        } else {
-          this.setState({
-            warning: true,
-            message: "please play spotify to see your current track",
-            stillLoading: false
-          });
-          this.getRecentlyPlayed();
-        }
+        // The response was undefined.
+        // Meaning: The user is not currently playing a track
+        this.setState({
+          warning: {
+            status: true,
+            message: "please play spotify to see your current track"
+          },
+          stillLoading: false
+        });
+        this.getRecentlyPlayed();
       }
     } catch (e) {
       console.log(e);
     }
-  }
+  };
 
-  async componentDidMount() {
+  renderNowPlaying = () => {
+    const { loggedIn, stillLoading, warning } = this.state;
+    var nowPlaying;
+
+    if (!loggedIn) {
+      nowPlaying = (
+        <div>
+          <a
+            href={this.state.url}
+            className="medium ui spotify inverted button"
+          >
+            <i className="spotify icon green" />
+            Log in to get started
+          </a>
+        </div>
+      );
+    } else if (stillLoading) {
+      nowPlaying = <Loader />;
+    } else if (warning.status) {
+      nowPlaying = (
+        <h1 style={{ "font-family": "Monoton" }}>
+          {this.state.warning.message}
+        </h1>
+      );
+    } else {
+      nowPlaying = (
+        <div>
+          <NeonBox isPlaying={this.state.isPlaying} text="ON AIR" />
+          <Card
+            src={this.state.nowPlaying.albumArt}
+            title={this.state.nowPlaying.songName}
+            description={this.state.nowPlaying.artistNames}
+          />
+        </div>
+      );
+    }
+    return nowPlaying;
+  };
+
+  componentDidMount = async () => {
+    // Check the build of react and sets correct urls
     if (process.env.NODE_ENV !== "production") {
       this.setState({
         url: "http://localhost:5000/login"
       });
+    } else {
+      this.setState({
+        url: "https://pacific-sands-61806.herokuapp.com/login"
+      });
     }
-
+    // We are going to check the playback state every interval of one second
     this.intervalId = await setInterval(() => {
       if (this.state.loggedIn) {
         this.getNowPlaying();
       }
     }, 1000);
-  }
+  };
 
+  // Make sure to clear the interval if we unmount
   componentWillUnmount() {
     clearInterval(this.intervalId);
   }
@@ -134,49 +175,16 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <div className="nowPlaying">
-          {!this.state.loggedIn && (
-            <div>
-              <a
-                href={this.state.url}
-                className="medium ui spotify inverted button"
-              >
-                <i className="spotify icon green" />
-                Log in to get started
-              </a>
-            </div>
-          )}
-          {this.state.loggedIn &&
-            !this.state.stillLoading &&
-            !this.state.warning && (
-              <div>
-                <NeonBox isPlaying={this.state.isPlaying} text="ON AIR" />
-                <Card
-                  src={this.state.nowPlaying.albumArt}
-                  title={this.state.nowPlaying.songName}
-                  description={this.state.nowPlaying.artistNames}
-                />
-              </div>
-            )}
-          {this.state.stillLoading &&
-            this.state.loggedIn &&
-            !this.state.warning && (
-              // <div className="ui active inline big loader inverted" />
-              <Loader />
-            )}
-          {this.state.warning && (
-            <h1 style={{ "font-family": "Monoton" }}>{this.state.message}</h1>
-          )}
-        </div>
+        <div className="nowPlaying">{this.renderNowPlaying()}</div>
         <div>
           {this.state.recentlyPlayed.length !== 0 && (
-            <div className="ui">
+            <div>
               <h4 className="ui horizontal divider" style={{ color: "white" }}>
                 what you've been listening to
               </h4>
+              <ScrollableContainer recentlyPlayed={this.state.recentlyPlayed} />
             </div>
           )}
-          <ScrollableContainer recentlyPlayed={this.state.recentlyPlayed} />
         </div>
       </div>
     );
