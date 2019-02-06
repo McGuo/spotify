@@ -1,3 +1,5 @@
+require("./config/config");
+
 const request = require("request"); // "Request" library
 const cors = require("cors");
 const querystring = require("querystring");
@@ -11,17 +13,6 @@ const aws = require("aws-sdk");
 
 const isDev = process.env.NODE_ENV !== "production";
 const PORT = process.env.PORT || 5000;
-
-var secret;
-
-if (isDev) {
-  secret = require("./secret");
-}
-
-const CLIENT_ID = process.env.CLIENT_ID || secret.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET || secret.CLIENT_SECRET;
-const REDIRECT_URI = process.env.REDIRECT_URI || secret.REDIRECT_URI;
-const FRONT_URL = process.env.FRONT_URL || secret.FRONT_URL;
 
 // Multi-process to utilize all CPU cores.
 if (!isDev && cluster.isMaster) {
@@ -72,9 +63,9 @@ if (!isDev && cluster.isMaster) {
       "https://accounts.spotify.com/authorize?" +
         querystring.stringify({
           response_type: "code",
-          client_id: CLIENT_ID,
+          client_id: process.env.CLIENT_ID,
           scope,
-          redirect_uri: REDIRECT_URI,
+          redirect_uri: process.env.REDIRECT_URI,
           state
         })
     );
@@ -101,13 +92,15 @@ if (!isDev && cluster.isMaster) {
         url: "https://accounts.spotify.com/api/token",
         form: {
           code: code,
-          redirect_uri: REDIRECT_URI,
+          redirect_uri: process.env.REDIRECT_URI,
           grant_type: "authorization_code"
         },
         headers: {
           Authorization:
             "Basic " +
-            new Buffer(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64")
+            new Buffer(
+              process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET
+            ).toString("base64")
         },
         json: true
       };
@@ -130,7 +123,7 @@ if (!isDev && cluster.isMaster) {
 
           // we can also pass the token to the browser to make requests from there
           res.redirect(
-            `${FRONT_URL}/#` +
+            `${process.env.FRONT_URL}/#` +
               querystring.stringify({
                 access_token: access_token,
                 refresh_token: refresh_token
@@ -156,7 +149,9 @@ if (!isDev && cluster.isMaster) {
       headers: {
         Authorization:
           "Basic " +
-          new Buffer(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64")
+          new Buffer(
+            process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET
+          ).toString("base64")
       },
       form: {
         grant_type: "refresh_token",
