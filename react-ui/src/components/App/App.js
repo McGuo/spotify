@@ -50,9 +50,7 @@ class App extends Component {
       });
       console.log(response.items);
 
-      this.setState({
-        recentlyPlayed: response.items
-      });
+      this.setState({ recentlyPlayed: response.items });
     } catch (e) {
       console.log(e.response);
     }
@@ -61,26 +59,24 @@ class App extends Component {
   // Gets the currently playing track
   getNowPlaying = async () => {
     try {
+      const { loggedIn, nowPlaying, isPlaying, warning } = this.state;
       // Check the current track that is playing
       const response = await spotifyApi.getMyCurrentPlaybackState();
 
       if (response) {
         const song = response.item;
-        if (
-          this.state.loggedIn &&
-          song.name !== this.state.nowPlaying.songName
-        ) {
+        if (loggedIn && song.name !== nowPlaying.songName) {
           console.log("skipped song!");
           setTimeout(() => {
             this.getRecentlyPlayed();
           }, 4000);
         }
 
-        if (response.is_playing !== this.state.isPlaying) {
+        if (response.is_playing !== isPlaying) {
           this.setState({ isPlaying: response.is_playing });
         }
 
-        if (this.state.warning.status) {
+        if (warning.status) {
           this.setState({ warning: { status: false } });
         }
 
@@ -110,42 +106,40 @@ class App extends Component {
   };
 
   renderNowPlaying = () => {
-    const { loggedIn, stillLoading, warning } = this.state;
-    var nowPlaying;
+    const { loggedIn, stillLoading, warning, isPlaying } = this.state;
+    // Can't fit everything in one line sad face
+    const { nowPlaying, url } = this.state;
+
+    let currPlaying;
 
     if (!loggedIn) {
-      nowPlaying = (
+      currPlaying = (
         <div>
-          <a
-            href={this.state.url}
-            className="medium ui spotify inverted button"
-          >
+          <a href={url} className="medium ui spotify inverted button">
             <i className="spotify icon green" />
             Log in to get started
           </a>
         </div>
       );
     } else if (stillLoading) {
-      nowPlaying = <Loader />;
+      currPlaying = <Loader />;
     } else if (warning.status) {
-      nowPlaying = (
-        <h1 style={{ "font-family": "Monoton" }}>
-          {this.state.warning.message}
-        </h1>
+      currPlaying = (
+        <h1 style={{ "font-family": "Monoton" }}>{warning.message}</h1>
       );
     } else {
-      nowPlaying = (
+      currPlaying = (
         <div>
-          <NeonBox isPlaying={this.state.isPlaying} text="ON AIR" />
+          <NeonBox isPlaying={isPlaying} text="ON AIR" />
           <Card
-            src={this.state.nowPlaying.albumArt}
-            title={this.state.nowPlaying.songName}
-            description={this.state.nowPlaying.artistNames}
+            src={nowPlaying.albumArt}
+            title={nowPlaying.songName}
+            description={nowPlaying.artistNames}
           />
         </div>
       );
     }
-    return nowPlaying;
+    return currPlaying;
   };
 
   componentDidMount = async () => {

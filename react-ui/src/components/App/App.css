@@ -1,8 +1,6 @@
-/* client/src/App.css */
-
 .App {
   background-image: linear-gradient(to bottom right, #3a6b58, #0e5d90);
-  min-height: 170vh;
+  min-height: 160vh;
   color: white;
 }
 
@@ -11,8 +9,4 @@
   text-align: center;
   display: flex;
   justify-content: center;
-}
-
-.button {
-  margin: 10px !important;
 }
