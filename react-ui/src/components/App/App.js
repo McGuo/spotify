@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import "./App.css";
 import SpotifyWebApi from "spotify-web-api-js";
-import Card from "../Card/";
 import ScrollableContainer from "../ScrollableContainer/";
-import NeonBox from "../NeonBox/";
-import Loader from "../Loader/";
+import NowPlaying from "../NowPlaying/";
 
 const spotifyApi = new SpotifyWebApi();
 
@@ -26,12 +24,12 @@ class App extends Component {
         songName: "",
         albumArt: "",
         artistNames: [],
-        trackDetails: null
+        trackDetails: null,
+        stillLoading: true,
+        warning: { status: false, message: "" },
+        isPlaying: false
       },
       recentlyPlayed: [],
-      stillLoading: true,
-      isPlaying: false,
-      warning: { status: false, message: "" },
       url: ""
     };
   }
@@ -61,98 +59,72 @@ class App extends Component {
     }
   };
 
+  setNowPlaying = async (response, trackDetails = null) => {
+    const { nowPlaying } = this.state;
+    const song = response.item;
+    let copyNowPlaying = { ...nowPlaying };
+
+    if (response.is_playing !== nowPlaying.isPlaying) {
+      copyNowPlaying.isPlaying = response.is_playing;
+    }
+
+    if (nowPlaying.warning.status) {
+      copyNowPlaying.warning.status = false;
+    }
+
+    this.setState({
+      nowPlaying: {
+        ...copyNowPlaying,
+        songName: song.name,
+        albumArt: song.album.images[0].url,
+        artistNames: song.artists,
+        stillLoading: false,
+        trackDetails: trackDetails
+      }
+    });
+  };
+
   // Gets the currently playing track
   getNowPlaying = async () => {
     try {
-      const { loggedIn, nowPlaying, isPlaying, warning } = this.state;
+      const { loggedIn, nowPlaying } = this.state;
       // Check the current track that is playing
       const response = await spotifyApi.getMyCurrentPlaybackState();
-      const trackDetails = await spotifyApi.getAudioFeaturesForTrack(
-        response.item.id
-      );
 
       if (response) {
         const song = response.item;
         if (loggedIn && song.name !== nowPlaying.songName) {
-          console.log("skipped song!");
+          const trackDetails = await spotifyApi.getAudioFeaturesForTrack(
+            response.item.id
+          );
+
+          this.setNowPlaying(response, trackDetails);
           // Update state pls!
           setTimeout(() => {
             this.getRecentlyPlayed();
           }, 4000);
+        } else {
+          this.setNowPlaying(response, nowPlaying.trackDetails);
         }
-
-        if (response.is_playing !== isPlaying) {
-          this.setState({ isPlaying: response.is_playing });
-        }
-
-        if (warning.status) {
-          this.setState({ warning: { status: false } });
-        }
-
-        this.setState({
-          nowPlaying: {
-            songName: song.name,
-            albumArt: song.album.images[0].url,
-            artistNames: song.artists,
-            trackDetails: trackDetails
-          },
-          stillLoading: false
-        });
       } else {
         // The response was undefined.
         // Meaning: The user is not currently playing a track
+
         this.setState({
-          warning: {
-            status: true,
-            message: "please play spotify to see your current track"
-          },
-          stillLoading: false
+          nowPlaying: {
+            ...this.state.nowPlaying,
+            stillLoading: false,
+            warning: {
+              status: true,
+              message: "please play spotify to see your current track"
+            }
+          }
         });
         this.getRecentlyPlayed();
       }
     } catch (e) {
       console.log(e);
     }
-  };
-
-  renderNowPlaying = () => {
-    const { loggedIn, stillLoading, warning, isPlaying } = this.state;
-    // Can't fit everything in one line sad face
-    const { nowPlaying, url } = this.state;
-
-    let currPlaying;
-
-    if (!loggedIn) {
-      currPlaying = (
-        <div>
-          <a href={url} className="medium ui spotify inverted button">
-            <i className="spotify icon green" />
-            Log in to get started
-          </a>
-        </div>
-      );
-    } else if (stillLoading) {
-      currPlaying = <Loader />;
-    } else if (warning.status) {
-      currPlaying = (
-        <h1 style={{ "font-family": "Monoton" }}>{warning.message}</h1>
-      );
-    } else {
-      currPlaying = (
-        <div>
-          <NeonBox isPlaying={isPlaying} text="ON AIR" />
-          <Card
-            src={nowPlaying.albumArt}
-            title={nowPlaying.songName}
-            description={nowPlaying.artistNames}
-            extra_content={`Danceability: ${
-              this.state.nowPlaying.trackDetails.danceability
-            }`}
-          />
-        </div>
-      );
-    }
-    return currPlaying;
   };
 
   componentDidMount = async () => {
@@ -182,7 +154,11 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <div className="nowPlaying">{this.renderNowPlaying()}</div>
+        <NowPlaying
+          loggedIn={this.state.loggedIn}
+          nowPlaying={this.state.nowPlaying}
+          url={this.state.url}
+        />
         <div>
           {this.state.recentlyPlayed.length !== 0 && (
             <div>
