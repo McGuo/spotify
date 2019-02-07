@@ -59,7 +59,7 @@ class App extends Component {
     }
   };
 
-  setNowPlaying = async (response, trackDetails = null) => {
+  setNowPlaying = (response, trackDetails = null) => {
     const { nowPlaying } = this.state;
     const song = response.item;
     let copyNowPlaying = { ...nowPlaying };
