@@ -1,7 +1,7 @@
 {
-  "name": "heroku-cra-node",
+  "name": "spotify-app",
   "version": "1.0.0",
-  "description": "How to use create-react-app with a custom Node API on Heroku",
+  "description": "Using create-react-app with a custom Node API on Heroku to serve web app utilizing spotify api",
   "engines": {
     "node": "10.x"
   },

@@ -22,7 +22,12 @@ class App extends Component {
 
     this.state = {
       loggedIn: token ? true : false,
-      nowPlaying: { songName: "", albumArt: "", artistNames: [] },
+      nowPlaying: {
+        songName: "",
+        albumArt: "",
+        artistNames: [],
+        trackDetails: null
+      },
       recentlyPlayed: [],
       stillLoading: true,
       isPlaying: false,
@@ -62,11 +67,15 @@ class App extends Component {
       const { loggedIn, nowPlaying, isPlaying, warning } = this.state;
       // Check the current track that is playing
       const response = await spotifyApi.getMyCurrentPlaybackState();
+      const trackDetails = await spotifyApi.getAudioFeaturesForTrack(
+        response.item.id
+      );
 
       if (response) {
         const song = response.item;
         if (loggedIn && song.name !== nowPlaying.songName) {
           console.log("skipped song!");
+          // Update state pls!
           setTimeout(() => {
             this.getRecentlyPlayed();
           }, 4000);
@@ -84,7 +93,8 @@ class App extends Component {
           nowPlaying: {
             songName: song.name,
             albumArt: song.album.images[0].url,
-            artistNames: song.artists
+            artistNames: song.artists,
+            trackDetails: trackDetails
           },
           stillLoading: false
         });
@@ -135,6 +145,9 @@ class App extends Component {
             src={nowPlaying.albumArt}
             title={nowPlaying.songName}
             description={nowPlaying.artistNames}
+            extra_content={`Danceability: ${
+              this.state.nowPlaying.trackDetails.danceability
+            }`}
           />
         </div>
       );

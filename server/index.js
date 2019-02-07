@@ -1,10 +1,9 @@
 require("./config/config");
 
-const request = require("request"); // "Request" library
+const request = require("request");
 const cors = require("cors");
 const querystring = require("querystring");
 const cookieParser = require("cookie-parser");
-
 const express = require("express");
 const path = require("path");
 const cluster = require("cluster");
