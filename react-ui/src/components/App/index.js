@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import "./App.css";
 import SpotifyWebApi from "spotify-web-api-js";
-import ScrollableContainer from "../ScrollableContainer/";
-import NowPlaying from "../NowPlaying/";
+import ScrollableContainer from "../ScrollableContainer";
+import NowPlaying from "../NowPlaying";
 
 const spotifyApi = new SpotifyWebApi();
 
@@ -30,7 +30,8 @@ class App extends Component {
         isPlaying: false
       },
       recentlyPlayed: [],
-      url: ""
+      url: "",
+      topTracks: {}
     };
   }
   getHashParams = () => {
@@ -51,7 +52,7 @@ class App extends Component {
       const response = await spotifyApi.getMyRecentlyPlayedTracks({
         limit: 10
       });
-      console.log(response.items);
+      // console.log(response.items);
 
       this.setState({ recentlyPlayed: response.items });
     } catch (e) {
@@ -127,6 +128,26 @@ class App extends Component {
     }
   };
 
+  getTopTracks = async () => {
+    try {
+      const response = await spotifyApi.getMyTopTracks({ limit: 50 });
+      const songs = response.items;
+
+      let ids = [];
+
+      songs.forEach(song => {
+        ids.push(song.id);
+      });
+
+      const TracksDetails = await spotifyApi.getAudioFeaturesForTracks(ids);
+      this.setState({
+        topTracks: TracksDetails
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   componentDidMount = async () => {
     // Check the build of react and sets correct urls
     if (process.env.NODE_ENV !== "production") {
@@ -138,6 +159,9 @@ class App extends Component {
         url: "https://pacific-sands-61806.herokuapp.com/login"
       });
     }
+
+    this.getTopTracks();
+
     // We are going to check the playback state every interval of one second
     this.intervalId = await setInterval(() => {
       if (this.state.loggedIn) {
@@ -158,6 +182,7 @@ class App extends Component {
           loggedIn={this.state.loggedIn}
           nowPlaying={this.state.nowPlaying}
           url={this.state.url}
+          topTracks={this.state.topTracks}
         />
         <div>
           {this.state.recentlyPlayed.length !== 0 && (

@@ -57,7 +57,7 @@ if (!isDev && cluster.isMaster) {
 
     // your application requests authorization
     var scope =
-      "user-read-recently-played user-read-private user-read-email user-read-playback-state";
+      "user-read-recently-played user-read-private user-read-email user-read-playback-state user-top-read";
     res.redirect(
       "https://accounts.spotify.com/authorize?" +
         querystring.stringify({
