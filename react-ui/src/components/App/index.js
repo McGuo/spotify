@@ -27,11 +27,11 @@ class App extends Component {
         trackDetails: null,
         stillLoading: true,
         warning: { status: false, message: "" },
-        isPlaying: false
+        isPlaying: false,
       },
       recentlyPlayed: [],
       url: "",
-      topTracks: {}
+      topTracks: {},
     };
   }
   getHashParams = () => {
@@ -50,7 +50,7 @@ class App extends Component {
   getRecentlyPlayed = async () => {
     try {
       const response = await spotifyApi.getMyRecentlyPlayedTracks({
-        limit: 10
+        limit: 10,
       });
       // console.log(response.items);
 
@@ -80,8 +80,8 @@ class App extends Component {
         albumArt: song.album.images[0].url,
         artistNames: song.artists,
         stillLoading: false,
-        trackDetails: trackDetails
-      }
+        trackDetails: trackDetails,
+      },
     });
   };
 
@@ -117,9 +117,9 @@ class App extends Component {
             stillLoading: false,
             warning: {
               status: true,
-              message: "please play spotify to see your current track"
-            }
-          }
+              message: "please play spotify to see your current track",
+            },
+          },
         });
         this.getRecentlyPlayed();
       }
@@ -135,13 +135,13 @@ class App extends Component {
 
       let ids = [];
 
-      songs.forEach(song => {
+      songs.forEach((song) => {
         ids.push(song.id);
       });
 
       const TracksDetails = await spotifyApi.getAudioFeaturesForTracks(ids);
       this.setState({
-        topTracks: TracksDetails
+        topTracks: TracksDetails,
       });
     } catch (e) {
       console.log(e);
@@ -152,11 +152,11 @@ class App extends Component {
     // Check the build of react and sets correct urls
     if (process.env.NODE_ENV !== "production") {
       this.setState({
-        url: "http://localhost:5000/login"
+        url: "http://localhost:5000/login",
       });
     } else {
       this.setState({
-        url: "https://pacific-sands-61806.herokuapp.com/login"
+        url: "https://pacific-sands-61806.herokuapp.com/login",
       });
     }
 

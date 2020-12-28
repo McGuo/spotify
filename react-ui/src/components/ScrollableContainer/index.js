@@ -4,7 +4,7 @@ import Card from "../Card/";
 
 // The scrollable container is populated by multiple card components
 const ScrollableContainer = ({ recentlyPlayed }) => {
-  const renderedSongs = recentlyPlayed.map(song => {
+  const renderedSongs = recentlyPlayed.map((song) => {
     return (
       <li className="item">
         <Card

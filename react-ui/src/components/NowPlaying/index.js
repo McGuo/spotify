@@ -10,11 +10,11 @@ import {
   XAxis,
   YAxis,
   VerticalBarSeries,
-  DiscreteColorLegend
+  DiscreteColorLegend,
 } from "react-vis";
 
 class NowPlaying extends React.Component {
-  generateBarData = async topTracks => {};
+  generateBarData = async (topTracks) => {};
   renderBarChart = (trackDetails, topTracks) => {
     let barChart;
     if (trackDetails) {
@@ -22,10 +22,10 @@ class NowPlaying extends React.Component {
         { x: "Acoustic", y: Math.floor(trackDetails.acousticness * 100) },
         {
           x: "Danceability",
-          y: Math.floor(trackDetails.danceability * 100)
+          y: Math.floor(trackDetails.danceability * 100),
         },
         { x: "Energy", y: Math.floor(trackDetails.energy * 100) },
-        { x: "Liveness", y: Math.floor(trackDetails.liveness * 100) }
+        { x: "Liveness", y: Math.floor(trackDetails.liveness * 100) },
       ];
 
       const songs = topTracks.audio_features;
@@ -34,9 +34,9 @@ class NowPlaying extends React.Component {
         Acoustic: 0,
         Danceability: 0,
         Energy: 0,
-        Liveness: 0
+        Liveness: 0,
       };
-      songs.forEach(song => {
+      songs.forEach((song) => {
         // console.log(song.danceability);
 
         profileData["Acoustic"] += song.acousticness;
@@ -58,10 +58,10 @@ class NowPlaying extends React.Component {
 
       let finalData = [];
 
-      Object.keys(profileData).forEach(function(key) {
+      Object.keys(profileData).forEach(function (key) {
         finalData.push({
           x: key,
-          y: profileData[key]
+          y: profileData[key],
         });
       });
 
@@ -78,17 +78,17 @@ class NowPlaying extends React.Component {
             items={[
               {
                 title: "Current Track Playing",
-                color: "#9cedff"
+                color: "#9cedff",
               },
               {
                 title: "Favorite songs (6 months)",
-                color: "#dd9183"
-              }
+                color: "#dd9183",
+              },
             ]}
           />
           <XAxis
             style={{
-              text: { fill: "#fff" }
+              text: { fill: "#fff" },
             }}
             hideLine
           />

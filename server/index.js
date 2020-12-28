@@ -24,9 +24,7 @@ if (!isDev && cluster.isMaster) {
 
   cluster.on("exit", (worker, code, signal) => {
     console.error(
-      `Node cluster worker ${
-        worker.process.pid
-      } exited: code ${code}, signal ${signal}`
+      `Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`
     );
   });
 } else {
@@ -38,7 +36,7 @@ if (!isDev && cluster.isMaster) {
     .use(cors())
     .use(cookieParser());
 
-  var generateRandomString = function(length) {
+  var generateRandomString = function (length) {
     var text = "";
     var possible =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -51,7 +49,7 @@ if (!isDev && cluster.isMaster) {
 
   var stateKey = "spotify_auth_state";
 
-  app.get("/login", function(req, res) {
+  app.get("/login", function (req, res) {
     var state = generateRandomString(16);
     res.cookie(stateKey, state);
 
@@ -65,12 +63,12 @@ if (!isDev && cluster.isMaster) {
           client_id: process.env.CLIENT_ID,
           scope,
           redirect_uri: process.env.REDIRECT_URI,
-          state
+          state,
         })
     );
   });
 
-  app.get("/callback", function(req, res) {
+  app.get("/callback", function (req, res) {
     // your application requests refresh and access tokens
     // after checking the state parameter
 
@@ -82,7 +80,7 @@ if (!isDev && cluster.isMaster) {
       res.redirect(
         "/#" +
           querystring.stringify({
-            error: "state_mismatch"
+            error: "state_mismatch",
           })
       );
     } else {
@@ -92,19 +90,19 @@ if (!isDev && cluster.isMaster) {
         form: {
           code: code,
           redirect_uri: process.env.REDIRECT_URI,
-          grant_type: "authorization_code"
+          grant_type: "authorization_code",
         },
         headers: {
           Authorization:
             "Basic " +
             new Buffer(
               process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET
-            ).toString("base64")
+            ).toString("base64"),
         },
-        json: true
+        json: true,
       };
 
-      request.post(authOptions, function(error, response, body) {
+      request.post(authOptions, function (error, response, body) {
         if (!error && response.statusCode === 200) {
           var access_token = body.access_token,
             refresh_token = body.refresh_token;
@@ -112,11 +110,11 @@ if (!isDev && cluster.isMaster) {
           var options = {
             url: "https://api.spotify.com/v1/me",
             headers: { Authorization: "Bearer " + access_token },
-            json: true
+            json: true,
           };
 
           // use the access token to access the Spotify Web API
-          request.get(options, function(error, response, body) {
+          request.get(options, function (error, response, body) {
             console.log(body);
           });
 
@@ -125,14 +123,14 @@ if (!isDev && cluster.isMaster) {
             `${process.env.FRONT_URL}/#` +
               querystring.stringify({
                 access_token: access_token,
-                refresh_token: refresh_token
+                refresh_token: refresh_token,
               })
           );
         } else {
           res.redirect(
             "/#" +
               querystring.stringify({
-                error: "invalid_token"
+                error: "invalid_token",
               })
           );
         }
@@ -140,7 +138,7 @@ if (!isDev && cluster.isMaster) {
     }
   });
 
-  app.get("/refresh_token", function(req, res) {
+  app.get("/refresh_token", function (req, res) {
     // requesting access token from refresh token
     var refresh_token = req.query.refresh_token;
     var authOptions = {
@@ -150,26 +148,26 @@ if (!isDev && cluster.isMaster) {
           "Basic " +
           new Buffer(
             process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET
-          ).toString("base64")
+          ).toString("base64"),
       },
       form: {
         grant_type: "refresh_token",
-        refresh_token: refresh_token
+        refresh_token: refresh_token,
       },
-      json: true
+      json: true,
     };
 
-    request.post(authOptions, function(error, response, body) {
+    request.post(authOptions, function (error, response, body) {
       if (!error && response.statusCode === 200) {
         var access_token = body.access_token;
         res.send({
-          access_token: access_token
+          access_token: access_token,
         });
       }
     });
   });
 
-  app.listen(PORT, function() {
+  app.listen(PORT, function () {
     console.error(
       `Node ${
         isDev ? "dev server" : "cluster worker " + process.pid

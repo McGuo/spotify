@@ -2,7 +2,7 @@ import React from "react";
 import "./Card.css";
 
 const Card = ({ src, title, date, description, extra_content, content }) => {
-  const renderedArtists = description.map(artist => {
+  const renderedArtists = description.map((artist) => {
     return <p key={artist.name}>{artist.name}</p>;
   });
   return (
