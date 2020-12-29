@@ -19,42 +19,42 @@ class NowPlaying extends React.Component {
     let barChart;
     if (trackDetails) {
       const currTrackData = [
-        { x: "Acoustic", y: Math.floor(trackDetails.acousticness * 100) },
         {
-          x: "Danceability",
+          x: "acousticness",
+          y: Math.floor(trackDetails.acousticness * 100),
+        },
+        {
+          x: "danceability",
           y: Math.floor(trackDetails.danceability * 100),
         },
-        { x: "Energy", y: Math.floor(trackDetails.energy * 100) },
-        { x: "Liveness", y: Math.floor(trackDetails.liveness * 100) },
+        { x: "energy", y: Math.floor(trackDetails.energy * 100) },
+        { x: "liveness", y: Math.floor(trackDetails.liveness * 100) },
       ];
 
       const songs = topTracks.audio_features;
 
-      let profileData = {
-        Acoustic: 0,
-        Danceability: 0,
-        Energy: 0,
-        Liveness: 0,
-      };
-      songs.forEach((song) => {
-        // console.log(song.danceability);
+      let audio_features_arr = [
+        "acousticness",
+        "danceability",
+        "energy",
+        "liveness",
+      ];
 
-        profileData["Acoustic"] += song.acousticness;
-        profileData["Danceability"] += song.danceability;
-        profileData["Energy"] += song.energy;
-        profileData["Liveness"] += song.liveness;
+      let profileData = {};
+
+      audio_features_arr.forEach((feature) => {
+        profileData[feature] = 0;
       });
 
-      profileData["Acoustic"] = Math.floor(
-        (profileData["Acoustic"] / 50) * 100
-      );
-      profileData["Danceability"] = Math.floor(
-        (profileData["Danceability"] / 50) * 100
-      );
-      profileData["Energy"] = Math.floor((profileData["Energy"] / 50) * 100);
-      profileData["Liveness"] = Math.floor(
-        (profileData["Liveness"] / 50) * 100
-      );
+      songs.forEach((song) => {
+        audio_features_arr.forEach((feature) => {
+          profileData[feature] += song[feature];
+        });
+      });
+
+      audio_features_arr.forEach((feature) => {
+        profileData[feature] = Math.floor((profileData[feature] / 50) * 100);
+      });
 
       let finalData = [];
 
