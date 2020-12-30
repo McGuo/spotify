@@ -17,30 +17,25 @@ class NowPlaying extends React.Component {
   generateBarData = async (topTracks) => {};
   renderBarChart = (trackDetails, topTracks) => {
     let barChart;
+    const songs = topTracks.audio_features;
+    let audio_features_arr = [
+      "acousticness",
+      "danceability",
+      "energy",
+      "liveness",
+    ];
+    let profileData = {};
+    let finalData = [];
+
     if (trackDetails) {
-      const currTrackData = [
-        {
-          x: "acousticness",
-          y: Math.floor(trackDetails.acousticness * 100),
-        },
-        {
-          x: "danceability",
-          y: Math.floor(trackDetails.danceability * 100),
-        },
-        { x: "energy", y: Math.floor(trackDetails.energy * 100) },
-        { x: "liveness", y: Math.floor(trackDetails.liveness * 100) },
-      ];
+      let currTrackData = [];
 
-      const songs = topTracks.audio_features;
-
-      let audio_features_arr = [
-        "acousticness",
-        "danceability",
-        "energy",
-        "liveness",
-      ];
-
-      let profileData = {};
+      audio_features_arr.forEach((feature) => {
+        currTrackData.push({
+          x: feature,
+          y: Math.floor(trackDetails[feature] * 100),
+        });
+      });
 
       audio_features_arr.forEach((feature) => {
         profileData[feature] = 0;
@@ -56,8 +51,6 @@ class NowPlaying extends React.Component {
         profileData[feature] = Math.floor((profileData[feature] / 50) * 100);
       });
 
-      let finalData = [];
-
       Object.keys(profileData).forEach(function (key) {
         finalData.push({
           x: key,
@@ -68,7 +61,7 @@ class NowPlaying extends React.Component {
       barChart = (
         <XYPlot
           xType="ordinal"
-          width={300}
+          width={350}
           height={300}
           xDistance={100}
           yDomain={[0, 100]}
@@ -81,7 +74,7 @@ class NowPlaying extends React.Component {
                 color: "#9cedff",
               },
               {
-                title: "Favorite songs (6 months)",
+                title: "Favorite Tracks (Top 50)",
                 color: "#dd9183",
               },
             ]}
